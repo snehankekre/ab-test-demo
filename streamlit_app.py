@@ -43,11 +43,6 @@ def significance(alpha, p):
     return "YES" if p < alpha else "NO"
 
 
-def explanation(significant):
-    if significant == "YES":
-        return f"Variant B's conversion rate ({st.session_state.crb:.3g}%) was {st.session_state.uplift:.3g}% higher than Variant A's converion rate ({st.session_state.cra:.3g}%). You can be {1 - st.session_state.alpha}% confident that this is not a result of chance"
-
-
 def plot_chart(df):
     chart = (
         alt.Chart(df)
