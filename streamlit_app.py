@@ -12,7 +12,7 @@ st.set_page_config(
 
 def conversion_rate(conversions, visitors):
     """Returns the conversion rate for a given number of conversions and number of visitors.
-    
+
     Parameters
     ----------
     conversions: int
@@ -30,7 +30,7 @@ def conversion_rate(conversions, visitors):
 
 def lift(cra, crb):
     """Returns the relative uplift in conversion rate.
-    
+
     Parameters
     ----------
     cra: float
@@ -49,10 +49,10 @@ def lift(cra, crb):
 def std_err(cr, visitors):
     """
     Returns the standard error of the conversion rate.
-    The standard error is used to calculate the deviation in conversion rates for a specific 
+    The standard error is used to calculate the deviation in conversion rates for a specific
     Group if the experiment is repeated multiple times.
 
-    For a given conversion rate (cr) and a number of trials (visitors), 
+    For a given conversion rate (cr) and a number of trials (visitors),
     the standard error is calculated as:
     Standard Error (std_err) = Square root of (cr * (1-cr) / visitors)
 
@@ -73,7 +73,7 @@ def std_err(cr, visitors):
 
 def std_err_diff(sea, seb):
     """Returns the z-score test statistic.
-    
+
     Parameters
     ----------
     sea: float
@@ -93,7 +93,7 @@ def std_err_diff(sea, seb):
 def z_score(cra, crb, error):
     """Returns the z-score test statistic measuring exactly how many
     standard deviations above or below the mean a data point is.
-    
+
     Parameters
     ----------
     cra: float
@@ -113,19 +113,19 @@ def z_score(cra, crb, error):
 
 
 def p_value(z, hypothesis):
-    """Returns the p-value, which is the probability of obtaining test 
-    results at least as extreme as the results actually observed, under 
+    """Returns the p-value, which is the probability of obtaining test
+    results at least as extreme as the results actually observed, under
     the assumption that the null hypothesis is correct.
-    
+
     Parameters
     ----------
     z: float
-        z-score test statistic        
+        z-score test statistic
     hypothesis: str
         Type of hypothesis test: "One-sided" or "Two-sided"
 
-        "One-sided" is a statistical hypothesis test set up to 
-        show that the sample mean would be higher or lower than the 
+        "One-sided" is a statistical hypothesis test set up to
+        show that the sample mean would be higher or lower than the
         population mean, but not both.
 
         "Two-sided" is a statistical hypothesis test in which the
@@ -136,7 +136,7 @@ def p_value(z, hypothesis):
     -------
     float
         p-value
-    """ 
+    """
     if hypothesis == "One-sided" and z < 0:
         return 1 - norm().sf(z)
     elif hypothesis == "One-sided" and z >= 0:
@@ -149,7 +149,7 @@ def significance(alpha, p):
     """Returns whether the p-value is statistically significant or not.
     A p-value (p) less than the significance level (alpha) is statistically
     significant.
-    
+
     Parameters
     ----------
     alpha: float
@@ -169,7 +169,7 @@ def significance(alpha, p):
 def plot_chart(df):
     """Diplays a bar chart of conversion rates of A/B test groups,
     with the y-axis denoting the conversion rates.
-    
+
     Parameters
     ----------
     df: pd.DataFrame
@@ -178,7 +178,7 @@ def plot_chart(df):
     Returns
     -------
     streamlit.altair_chart
-        Bar chart with text above each bar denoting the conversion rate  
+        Bar chart with text above each bar denoting the conversion rate
     """
     chart = (
         alt.Chart(df)
@@ -201,7 +201,7 @@ def plot_chart(df):
 
 def style_negative(v, props=""):
     """Helper function to color text in a DataFrame if it is negative.
-    
+
     Parameters
     ----------
     v: float
@@ -224,7 +224,7 @@ def style_negative(v, props=""):
 def style_p_value(v, props=""):
     """Helper function to color p-value in DataFrame. If p-value is
     statististically significant, text is colored green; else red.
-    
+
     Parameters
     ----------
     v: float
@@ -250,7 +250,7 @@ def calculate_significance(
     """Calculates all metrics to be displayed including conversion rates,
     uplift, standard errors, z-score, p-value, significance, and stores them
     as session state variables.
-    
+
     Parameters
     ----------
     conversions_a: int
@@ -264,8 +264,8 @@ def calculate_significance(
     hypothesis: str
         Type of hypothesis test: "One-sided" or "Two-sided"
 
-        "One-sided" is a statistical hypothesis test set up to 
-        show that the sample mean would be higher or lower than the 
+        "One-sided" is a statistical hypothesis test set up to
+        show that the sample mean would be higher or lower than the
         population mean, but not both.
 
         "Two-sided" is a statistical hypothesis test in which the
@@ -299,6 +299,21 @@ Upload your experiment results to see the significance of your A/B test.
 
 uploaded_file = st.file_uploader("Upload CSV", type=".csv")
 
+use_example_file = st.checkbox(
+    "Use example file", False, help="Use in-built example file to demo the app"
+)
+
+ab_default = None
+result_default = None
+
+# If CSV is not uploaded and checkbox is filled, use values from the example file
+# and pass them down to the next if block
+if use_example_file:
+    uploaded_file = "Website_Results.csv"
+    ab_default = ["variant"]
+    result_default = ["converted"]
+
+
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
 
@@ -311,6 +326,7 @@ if uploaded_file:
             "A/B column",
             options=df.columns,
             help="Select which column refers to your A/B testing labels.",
+            default=ab_default,
         )
         if ab:
             control = df[ab[0]].unique()[0]
@@ -329,6 +345,7 @@ if uploaded_file:
             "Result column",
             options=df.columns,
             help="Select which column shows the result of the test.",
+            default=result_default,
         )
 
         if result:
@@ -364,11 +381,15 @@ if uploaded_file:
         st.warning("Please select both an **A/B column** and a **Result column**.")
         st.stop()
 
-    name = uploaded_file.name
+    # type(uploaded_file) == str, means the example file was used
+    name = (
+        "Website_Results.csv" if isinstance(uploaded_file, str) else uploaded_file.name
+    )
     st.write("")
     st.write("## Results for A/B test from ", name)
     st.write("")
 
+    # Obtain the metrics to display
     calculate_significance(
         conversions_a,
         conversions_b,
@@ -380,16 +401,18 @@ if uploaded_file:
 
     mcol1, mcol2 = st.columns(2)
 
+    # Use st.metric to diplay difference in conversion rates
     with mcol1:
         st.metric(
             "Delta",
             value=f"{(st.session_state.crb - st.session_state.cra):.3g}%",
             delta=f"{(st.session_state.crb - st.session_state.cra):.3g}%",
         )
-
+    # Display whether or not A/B test result is statistically significant
     with mcol2:
         st.metric("Significant?", value=st.session_state.significant)
 
+    # Create a single-row, two-column DataFrame to use in bar chart
     results_df = pd.DataFrame(
         {
             "Group": ["Control", "Treatment"],
@@ -399,6 +422,7 @@ if uploaded_file:
     st.write("")
     st.write("")
 
+    # Plot bar chart of conversion rates
     plot_chart(results_df)
 
     ncol1, ncol2 = st.columns([2, 1])
@@ -412,6 +436,7 @@ if uploaded_file:
         index=pd.Index(["Control", "Treatment"]),
     )
 
+    # Format "% Converted" column values to 3 decimal places
     table1 = ncol1.write(table.style.format(formatter={("% Converted"): "{:.3g}%"}))
 
     metrics = pd.DataFrame(
@@ -423,6 +448,7 @@ if uploaded_file:
         index=pd.Index(["Metrics"]),
     )
 
+    # Color negative values red; color significant p-value green and not significant red
     table2 = ncol1.write(
         metrics.style.format(
             formatter={("p-value", "z-score"): "{:.3g}", ("uplift"): "{:.3g}%"}
