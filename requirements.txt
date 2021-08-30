@@ -1,4 +1,4 @@
-streamlit-0.84.0-py2.py3-none-any.whl
+streamlit==0.87.0
 numpy==1.19.5
 altair==4.1.0
 pandas==1.2.5
