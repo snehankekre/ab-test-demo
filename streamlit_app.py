@@ -305,7 +305,7 @@ use_example_file = st.checkbox(
 
 hide_hosted = """
 <style>
-a.viewerBadge_container__1QSob {display: None;}
+#root > div:nth-child(1) > div > div > a.viewerBadge_container__1QSob {display: None;}
 </style>
 """
 
