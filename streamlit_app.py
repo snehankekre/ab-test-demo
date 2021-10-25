@@ -303,6 +303,11 @@ use_example_file = st.checkbox(
     "Use example file", False, help="Use in-built example file to demo the app"
 )
 
+hide_hosted = """
+<style>
+.viewerBadge_container__1QSob {display: None;}
+</style>
+"""
 ab_default = None
 result_default = None
 
