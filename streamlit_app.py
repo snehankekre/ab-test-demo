@@ -303,13 +303,6 @@ use_example_file = st.checkbox(
     "Use example file", False, help="Use in-built example file to demo the app"
 )
 
-hide_hosted = """
-<style>
-#root > div:nth-child(1) > div > div > a.viewerBadge_container__1QSob {display: None;}
-</style>
-"""
-
-st.markdown(hide_hosted, unsafe_allow_html=True)
 ab_default = None
 result_default = None
 
