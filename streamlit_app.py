@@ -304,9 +304,9 @@ use_example_file = st.checkbox(
 )
 
 hide_hosted = """
-<style>
+<div>
 .viewerBadge_container__1QSob {display: None;}
-</style>
+</div>
 """
 
 st.markdown(hide_hosted, unsafe_allow_html=True)
